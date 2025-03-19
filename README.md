@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Divisores de Tensión</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #000000, #333333 70%, #ffd700 80%); /* Mayor negro */
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco con algo de opacidad */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #000; /* Texto negro */
+        }
+        input {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #28a745; /* Verde para el botón */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838; /* Verde más oscuro al pasar el mouse */
+        }
+        select {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        h2 {
+            margin-top: 20px;
+            color: #000; /* Texto negro */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Divisores de Tensión</h1>
+        <label for="vIn">Tensión de entrada (V):</label>
+        <input type="number" id="vIn" placeholder="Ejemplo: 10"><br>
+
+        <label for="r1">Resistencia R1:</label>
+        <input type="number" id="r1" placeholder="Valor" step="any">
+        <select id="r1Unit">
+            <option value="1">Ω</option>
+            <option value="1000">kΩ</option>
+            <option value="1000000">MΩ</option>
+        </select><br>
+
+        <label for="r2">Resistencia R2:</label>
+        <input type="number" id="r2" placeholder="Valor" step="any">
+        <select id="r2Unit">
+            <option value="1">Ω</option>
+            <option value="1000">kΩ</option>
+            <option value="1000000">MΩ</option>
+        </select><br>
+
+        <button onclick="calcular()">Calcular Tensión de Salida</button>
+        <h2 id="resultado"></h2>
+    </div>
+
+    <script>
+        function calcular() {
+            const vIn = parseFloat(document.getElementById("vIn").value);
+            const r1Value = parseFloat(document.getElementById("r1").value);
+            const r1Unit = parseFloat(document.getElementById("r1Unit").value);
+            const r2Value = parseFloat(document.getElementById("r2").value);
+            const r2Unit = parseFloat(document.getElementById("r2Unit").value);
+
+            const r1 = r1Value * r1Unit; // Convertir R1 a ohmios
+            const r2 = r2Value * r2Unit; // Convertir R2 a ohmios
+
+            if (!isNaN(vIn) && !isNaN(r1) && !isNaN(r2) && r1 > 0 && r2 > 0) {
+                const vOut = (vIn * r2) / (r1 + r2);
+                document.getElementById("resultado").innerText = `Tensión de salida (Vout): ${vOut.toFixed(2)} V`;
+            } else {
+                document.getElementById("resultado").innerText = "Por favor, ingresa valores válidos.";
+            }
+        }
+    </script>
