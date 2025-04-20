@@ -18,29 +18,28 @@
         .container {
             text-align: center;
             background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             max-width: 500px;
             width: 100%;
         }
         label {
             display: block;
-            margin-top: 10px;
+            margin-top: 15px;
             color: #000;
             font-weight: bold;
         }
         input, select {
             margin-bottom: 10px;
             padding: 8px;
-            width: 100%;
-            box-sizing: border-box;
+            width: 80%;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
         button {
-            margin-top: 15px;
-            padding: 10px 20px;
+            margin-top: 20px;
+            padding: 12px 25px;
             background-color: #28a745;
             color: white;
             border: none;
@@ -48,7 +47,6 @@
             cursor: pointer;
             transition: background-color 0.3s;
             font-size: 16px;
-            width: 100%;
         }
         button:hover {
             background-color: #218838;
@@ -58,19 +56,20 @@
             margin-bottom: 20px;
         }
         h2 {
-            margin-top: 20px;
+            margin-top: 25px;
             color: #000;
             padding: 10px;
+            border-radius: 5px;
             background-color: #f8f9fa;
-            border-radius: 4px;
         }
         .input-group {
             display: flex;
+            justify-content: center;
             align-items: center;
+            gap: 10px;
         }
         .input-group input {
             flex: 1;
-            margin-right: 10px;
         }
         .input-group select {
             width: auto;
@@ -86,7 +85,7 @@
         
         <label for="r1">Resistencia R1:</label>
         <div class="input-group">
-            <input type="number" id="r1" placeholder="Valor de R1" step="any">
+            <input type="number" id="r1" placeholder="Valor" step="any">
             <select id="r1Unit">
                 <option value="1">Ω</option>
                 <option value="1000">kΩ</option>
@@ -96,7 +95,7 @@
         
         <label for="r2">Resistencia R2:</label>
         <div class="input-group">
-            <input type="number" id="r2" placeholder="Valor de R2" step="any">
+            <input type="number" id="r2" placeholder="Valor" step="any">
             <select id="r2Unit">
                 <option value="1">Ω</option>
                 <option value="1000">kΩ</option>
@@ -113,6 +112,7 @@
 
     <script>
         function calcular() {
+            // Obtener valores de los inputs
             const vIn = parseFloat(document.getElementById("vIn").value);
             const r1Value = parseFloat(document.getElementById("r1").value);
             const r1Unit = parseFloat(document.getElementById("r1Unit").value);
@@ -124,50 +124,56 @@
             const r1 = isNaN(r1Value) ? NaN : r1Value * r1Unit;
             const r2 = isNaN(r2Value) ? NaN : r2Value * r2Unit;
             
-            let resultado = "";
+            // Función para formatear resistencia
+            function formatResistance(ohms) {
+                if (ohms >= 1000000) {
+                    return (ohms / 1000000).toFixed(3) + " MΩ";
+                } else if (ohms >= 1000) {
+                    return (ohms / 1000).toFixed(3) + " kΩ";
+                } else {
+                    return ohms.toFixed(2) + " Ω";
+                }
+            }
             
-            if (isNaN(vIn) || vIn <= 0) {
-                resultado = "Por favor, ingresa un valor válido para Vin (mayor que 0).";
-            } else if (!isNaN(vOut) && vOut > 0) {
-                // Caso 1: Se conoce Vout (calcular R1 o R2)
-                if (vOut >= vIn) {
-                    resultado = "Vout debe ser menor que Vin en un divisor de tensión.";
-                } else if (!isNaN(r1) && !isNaN(r2)) {
-                    resultado = "Por favor, deja vacío R1 o R2 para calcular el otro.";
-                } else if (!isNaN(r1)) {
+            // Determinar qué cálculo realizar
+            let resultado = "";
+            const camposVacios = [isNaN(vIn), isNaN(r1), isNaN(r2), isNaN(vOut)].filter(Boolean).length;
+            
+            if (camposVacios !== 1) {
+                resultado = "Por favor, deja exactamente un campo vacío para calcularlo (Vin, R1, R2 o Vout).";
+            } else if (!isNaN(vIn) && !isNaN(r1) && !isNaN(r2)) {
+                // Calcular Vout
+                const calculatedVOut = vIn * (r2 / (r1 + r2));
+                resultado = `Tensión de salida (Vout): ${calculatedVOut.toFixed(3)} V`;
+            } else if (!isNaN(vIn) && !isNaN(vOut)) {
+                if (!isNaN(r1)) {
                     // Calcular R2
-                    const calculatedR2 = r1 * (vOut / (vIn - vOut));
-                    resultado = `Resistencia R2 necesaria: ${formatResistance(calculatedR2)}`;
+                    if (vOut >= vIn) {
+                        resultado = "Error: Vout no puede ser mayor o igual que Vin";
+                    } else {
+                        const calculatedR2 = r1 * (vOut / (vIn - vOut));
+                        resultado = `Resistencia R2 necesaria: ${formatResistance(calculatedR2)}`;
+                    }
                 } else if (!isNaN(r2)) {
                     // Calcular R1
-                    const calculatedR1 = r2 * ((vIn - vOut) / vOut);
-                    resultado = `Resistencia R1 necesaria: ${formatResistance(calculatedR1)}`;
+                    if (vOut >= vIn) {
+                        resultado = "Error: Vout no puede ser mayor o igual que Vin";
+                    } else {
+                        const calculatedR1 = r2 * ((vIn - vOut) / vOut);
+                        resultado = `Resistencia R1 necesaria: ${formatResistance(calculatedR1)}`;
+                    }
                 } else {
-                    resultado = "Por favor, ingresa al menos uno de R1 o R2 para calcular el otro.";
+                    resultado = "Por favor, ingresa R1 o R2 para calcular el otro.";
                 }
-            } else if (!isNaN(r1) && !isNaN(r2)) {
-                // Caso 2: Se conocen R1 y R2 (calcular Vout)
-                if (r1 <= 0 || r2 <= 0) {
-                    resultado = "Las resistencias deben ser mayores que 0.";
-                } else {
-                    const calculatedVOut = vIn * (r2 / (r1 + r2));
-                    resultado = `Tensión de salida (Vout): ${calculatedVOut.toFixed(2)} V`;
-                }
+            } else if (!isNaN(r1) && !isNaN(r2) && !isNaN(vOut)) {
+                // Calcular Vin
+                const calculatedVIn = vOut * ((r1 + r2) / r2);
+                resultado = `Tensión de entrada (Vin) necesaria: ${calculatedVIn.toFixed(3)} V`;
             } else {
-                resultado = "Por favor, ingresa valores para Vout o para ambas resistencias (R1 y R2).";
+                resultado = "Combinación de valores no válida. Introduce al menos 3 valores para calcular el cuarto.";
             }
             
-            document.getElementById("resultado").innerHTML = resultado;
-        }
-        
-        function formatResistance(resistance) {
-            if (resistance >= 1000000) {
-                return `${(resistance / 1000000).toFixed(2)} MΩ`;
-            } else if (resistance >= 1000) {
-                return `${(resistance / 1000).toFixed(2)} kΩ`;
-            } else {
-                return `${resistance.toFixed(2)} Ω`;
-            }
+            document.getElementById("resultado").innerText = resultado;
         }
     </script>
 </body>
